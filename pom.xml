@@ -7,20 +7,6 @@
   <version>1</version>
   <name>LoginWebApp Maven Webapp</name>
   <url>http://maven.apache.org</url>
-  <profiles>
-        <profile>
-            <id>sonar</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <!-- Optional URL to server. Default value is http://localhost:9000 -->
-                <sonar.host.url>
-                    http://10.12.124.93:9000
-                </sonar.host.url>
-            </properties>
-        </profile>
-    </profiles>
   <dependencies>
      <dependency>
             <groupId>javax.servlet</groupId>
@@ -51,6 +37,11 @@
                     <artifactId>maven-source-plugin</artifactId>
                     <version>2.1.2</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.9.0.2155</version>
+                 </plugin>
             </plugins>
         </pluginManagement>
   <plugins>
@@ -73,6 +64,14 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.0.2155</version>
+                <configuration>
+                <sonar.host.url>http://10.12.124.93:9000</sonar.host.url>
+      </configuration>
+    </plugin>
         </plugins>
     </build>
     <repositories>
