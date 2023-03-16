@@ -7,6 +7,20 @@
   <version>1</version>
   <name>LoginWebApp Maven Webapp</name>
   <url>http://maven.apache.org</url>
+  <profiles>
+        <profile>
+            <id>sonar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Optional URL to server. Default value is http://localhost:9000 -->
+                <sonar.host.url>
+                    http://10.12.124.93:9000
+                </sonar.host.url>
+            </properties>
+        </profile>
+    </profiles>
   <dependencies>
      <dependency>
             <groupId>javax.servlet</groupId>
