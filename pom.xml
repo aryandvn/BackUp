@@ -7,10 +7,6 @@
   <version>1</version>
   <name>LoginWebApp Maven Webapp</name>
   <url>http://maven.apache.org</url>
-  <properties>
-    <sonar.login>admin</sonar.login>
-    <sonar.password>admin123</sonar.password>
-</properties>
   <dependencies>
      <dependency>
             <groupId>javax.servlet</groupId>
