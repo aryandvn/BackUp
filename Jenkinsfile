@@ -1,62 +1,52 @@
 pipeline {
     agent any
-	
-	  tools
-    {
-       maven "Maven"
+
+    tools {
+        maven "MAVEN"
     }
- stages {
-      stage('checkout') {
-           steps {
-             
-                git branch: 'master', url: 'https://github.com/devops4solutions/CI-CD-using-Docker.git'
-             
-          }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: '2015f835-5756-4d8f-86c2-c468cc526883', url: 'https://github.com/aryandvn/BackUp.git']])
+            }
         }
-	 stage('Execute Maven') {
+        stage('Static Analysis (SonarQube)') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withSonarQubeEnv('sq1') {
+                        sh """
+                        mvn sonar:sonar Dsonar.projectKey=Jenkins_Sonar Dsonar.host.url=http://10.12.124.93:9000 Dsonar.login=sqp_4391cfae5f420fafb78898f751526882c8448b04
+                        """
+                    }
+                }
+            }
+        }
+        stage('Build (war)') {
            steps {
              
+                echo "Building war file"
                 sh 'mvn package'             
           }
         }
-        
-
-  stage('Docker Build and Tag') {
-           steps {
-              
-                sh 'docker build -t samplewebapp:latest .' 
-                sh 'docker tag samplewebapp nikhilnidhi/samplewebapp:latest'
-                //sh 'docker tag samplewebapp nikhilnidhi/samplewebapp:$BUILD_NUMBER'
-               
-          }
-        }
-     
-  stage('Publish image to Docker Hub') {
-          
-            steps {
-        withDockerRegistry([ credentialsId: "dockerHub", url: "" ]) {
-          sh  'docker push nikhilnidhi/samplewebapp:latest'
-        //  sh  'docker push nikhilnidhi/samplewebapp:$BUILD_NUMBER' 
-        }
-                  
-          }
-        }
-     
-      stage('Run Docker container on Jenkins Agent') {
-             
-            steps 
-			{
-                sh "docker run -d -p 8003:8080 nikhilnidhi/samplewebapp"
- 
-            }
-        }
- stage('Run Docker container on remote hosts') {
-             
-            steps {
-                sh "docker -H ssh://jenkins@172.31.28.25 run -d -p 8003:8080 nikhilnidhi/samplewebapp"
- 
+        stage('Artifact Upload (Nexus)') {
+            steps{
+                nexusArtifactUploader artifacts: [
+                        [
+                            artifactId: 'LoginWebApp', 
+                            classifier: '', 
+                            file: 'target/LoginWebApp-1.war', 
+                            type: 'war'
+                        ]
+                    ], 
+                    credentialsId: 'Admin_Nexus', 
+                    groupId: 'com.devops4solutions', 
+                    nexusUrl: '10.12.124.93:8081', 
+                    nexusVersion: 'nexus3', 
+                    protocol: 'http', 
+                    repository: 'DEMO-2', 
+                    version: '1'
             }
         }
     }
-	}
-    
+}
