@@ -48,7 +48,7 @@ pipeline {
                     version: '1'
             }
         }
-        stage('Creating Tar') {
+        stage('Creating Backup') {
             steps {
                 sh """
                 cd /
