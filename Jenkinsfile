@@ -48,5 +48,37 @@ pipeline {
                     version: '1'
             }
         }
+        stage('Creating Tar') {
+            steps {
+                sh """
+                cd /
+                git clone https://github.com/aryandvn/BackUp-Volume.git
+                cd BackUp-Volume
+                rm -rf *
+                mkdir JenBackup
+                mkdir SonarQubeBackup
+                cd /
+                cd var/jenkins_home/
+                cp -r * /BackUp-Volume/JenBackup/
+                ls -l
+                docker cp 89e8fcfeda9b:/nexus-data /BackUp-Volume/
+                docker cp 6a88f6322ca7:/opt/sonarqube/conf /BackUp-Volume/SonarQubeBackup
+                docker cp 6a88f6322ca7:/opt/sonarqube/extensions /BackUp-Volume/SonarQubeBackup
+                docker cp 6a88f6322ca7:/opt/sonarqube/data /BackUp-Volume/SonarQubeBackup
+                docker cp 6a88f6322ca7:/opt/sonarqube/lib/bundled-plugins /BackUp-Volume/SonarQubeBackup
+                cd /
+                cd /BackUp-Volume
+                tar -czvf JenBackup.tar.gz JenBackup/
+                tar -czvf NexusBackup.tar.gz nexus-data/
+                tar -czvf SonarQubeBackup.tar.gz SonarQubeBackup/
+                rm -rf JenBackup/
+                rm -rf nexus-data/
+                rm -rf SonarQubeBackup/
+                git status
+                git add .
+                git commit -m "Made changes"
+                """
+            } 
+        }
     }
 }
