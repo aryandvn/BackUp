@@ -53,21 +53,21 @@ pipeline {
                 sh """
                 cd /
                 git clone https://github.com/aryandvn/VolumesBackup.git
-                cd BackUp-Volume
+                cd VolumesBackup
                 rm -rf *
                 mkdir JenBackup
                 mkdir SonarQubeBackup
                 cd /
                 cd var/jenkins_home/
-                cp -r * /BackUp-Volume/JenBackup/
+                cp -r * /VolumesBackup/JenBackup/
                 ls -l
-                docker cp 89e8fcfeda9b:/nexus-data /BackUp-Volume/
-                docker cp 6a88f6322ca7:/opt/sonarqube/conf /BackUp-Volume/SonarQubeBackup
-                docker cp 6a88f6322ca7:/opt/sonarqube/extensions /BackUp-Volume/SonarQubeBackup
-                docker cp 6a88f6322ca7:/opt/sonarqube/data /BackUp-Volume/SonarQubeBackup
-                docker cp 6a88f6322ca7:/opt/sonarqube/lib/bundled-plugins /BackUp-Volume/SonarQubeBackup
+                docker cp 89e8fcfeda9b:/nexus-data /VolumesBackup/
+                docker cp 6a88f6322ca7:/opt/sonarqube/conf /VolumesBackup/SonarQubeBackup
+                docker cp 6a88f6322ca7:/opt/sonarqube/extensions /VolumesBackup/SonarQubeBackup
+                docker cp 6a88f6322ca7:/opt/sonarqube/data /VolumesBackup/SonarQubeBackup
+                docker cp 6a88f6322ca7:/opt/sonarqube/lib/bundled-plugins /VolumesBackup/SonarQubeBackup
                 cd /
-                cd /BackUp-Volume
+                cd /VolumesBackup
                 tar -czvf JenBackup.tar.gz JenBackup/
                 tar -czvf NexusBackup.tar.gz nexus-data/
                 tar -czvf SonarQubeBackup.tar.gz SonarQubeBackup/
