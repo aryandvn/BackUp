@@ -52,7 +52,7 @@ pipeline {
             steps {
                 sh """
                 cd /
-                git clone https://github.com/aryandvn/BackUp-Volume.git
+                git clone https://github.com/aryandvn/VolumesBackup.git
                 cd BackUp-Volume
                 rm -rf *
                 mkdir JenBackup
