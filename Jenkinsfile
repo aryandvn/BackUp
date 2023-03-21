@@ -74,7 +74,7 @@ pipeline {
                 rm -rf JenBackup/
                 rm -rf nexus-data/
                 rm -rf SonarQubeBackup/
-                git lfs track "*.tar.gz"
+                git status
                 git add .
                 git commit -m "Made changes"
                 """
