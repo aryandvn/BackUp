@@ -1,7 +1,7 @@
 version: '3.3'
 services:
    jenkins:
-     image: jenkins_mod
+     image: jenkins/jenkins
      privileged: true
      user: root
      ports:
