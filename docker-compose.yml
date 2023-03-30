@@ -13,7 +13,7 @@ services:
        - /var/run/docker.sock:/var/run/docker.sock
 
    nexus:
-     image: aryan-nexus
+     image: aryandvn24/aryan-nexus
      privileged: true
      user: root
      ports:
@@ -24,7 +24,7 @@ services:
 
    sonarqube:
      container_name: sonarqube
-     image: sonarqube
+     image: aryandvn24/aryan-sonar
      depends_on:
        - sonarqube-database
      volumes:
