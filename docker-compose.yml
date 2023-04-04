@@ -85,9 +85,12 @@ services:
       MYSQL_USER: testuser
       MYSQL_PASSWORD: root
 volumes:
-    db_vol:      
+    db_vol:
+      external: true
     Nexus:
+      external: true
     Jenkins:
+      external: true
     sonarqube_database_data:
     sonarqube_bundled-plugins:
     sonarqube_conf:
