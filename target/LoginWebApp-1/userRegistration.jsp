@@ -6,7 +6,7 @@
     String lastName = request.getParameter("lastName");
     String email = request.getParameter("email");
     Class.forName("com.mysql.jdbc.Driver");
-    java.sql.Connection con = java.sql.DriverManager.getConnection("jdbc:mysql://db:3306/testdb1",
+    java.sql.Connection con = java.sql.DriverManager.getConnection("jdbc:mysql://10.12.124.93:3306/testdb1",
             "testuser", "root");
     java.sql.Statement st = con.createStatement();
     int i = st.executeUpdate("insert into USER(first_name, last_name, email, username, password, regdate) values ('" + firstName + "','"
