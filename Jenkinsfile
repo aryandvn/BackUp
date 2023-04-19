@@ -1,84 +1,82 @@
 pipeline {
-    agent any
+  agent any
 
-    tools {
-        maven "MAVEN"
+  tools {
+      maven "MAVEN"
+  }
+
+  stages {
+    stage('Git Checkout') {
+        steps {
+            git branch: 'main', url: 'https://github.com/aryandvn/BackUp.git'
+        }
+    }
+    stage('Build (war)') {
+       steps {
+            echo "Building war file"
+            sh 'mvn package'             
+        }
+    }
+    stage('Artifact Upload (Nexus)') {
+        steps{
+            nexusArtifactUploader artifacts: [
+                    [
+                    artifactId: 'LoginWebApp', 
+                    classifier: '', 
+                    file: 'target/LoginWebApp-1.war', 
+                    type: 'war'
+                ]
+            ], 
+            credentialsId: 'Admin_Nexus', 
+            groupId: 'com.devops4solutions', 
+            nexusUrl: '10.12.124.93:8081', 
+            nexusVersion: 'nexus3', 
+            protocol: 'http', 
+            repository: 'DEMO-2', 
+            version: '1'
+        }
+    }
+    stage('Docker Build and Tag') {
+        steps {
+            sh 'docker build -t samplewebapp:latest .' 
+            sh 'docker tag samplewebapp aryandvn24/samplewebapp:latest'
+        }
     }
 
-    stages {
-        stage('Git Checkout') {
-            steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: '2015f835-5756-4d8f-86c2-c468cc526883', url: 'https://github.com/aryandvn/BackUp.git']])
+    stage('Publish image to Docker Hub') {
+        steps {
+         withDockerRegistry([ credentialsId: "DockerHub", url: "" ]) {
+            sh  'docker push aryandvn24/samplewebapp:latest'
             }
         }
-        stage('Static Analysis (SonarQube)') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    withSonarQubeEnv('sq1') {
-                        sh """
-                        mvn clean verify sonar:sonar -Dsonar.projectKey=Jenkins_Sonar 
-                        """
-                    }
+    }
+    stage('Run Docker container on Jenkins Agent') {
+         steps {
+             script {
+                def containerName = "WebApp"
+                def isRunning = sh(
+                    returnStatus: true,
+                    script: "docker ps --filter \"name=${containerName}\" --format '{{.Names}}' | grep -w ${containerName}"
+                )
+                if (isRunning == 0) {
+                    println "Container ${containerName} is running"
+                    sh "docker stop ${containerName}"
+                    sh "docker rm ${containerName}"
+                    sh "docker rmi samplewebapp:latest"
+                    sh "docker rmi aryandvn24/samplewebapp"
+                    sh "docker run -d --name WebApp -p 8003:8080 aryandvn24/samplewebapp"
+                } else {
+                    sh "docker run -d --name WebApp -p 8003:8080 aryandvn24/samplewebapp"
                 }
             }
         }
-        stage('Build (war)') {
-           steps {
-             
-                echo "Building war file"
-                sh 'mvn package'             
-          }
-        }
-        stage('Artifact Upload (Nexus)') {
-            steps{
-                nexusArtifactUploader artifacts: [
-                        [
-                            artifactId: 'LoginWebApp', 
-                            classifier: '', 
-                            file: 'target/LoginWebApp-1.war', 
-                            type: 'war'
-                        ]
-                    ], 
-                    credentialsId: 'Admin_Nexus', 
-                    groupId: 'com.devops4solutions', 
-                    nexusUrl: '10.12.124.93:8081', 
-                    nexusVersion: 'nexus3', 
-                    protocol: 'http', 
-                    repository: 'DEMO-2', 
-                    version: '1'
-            }
-        }
-        stage('Creating Backup') {
-            steps {
-                sh """
-                cd /
-                git clone https://github.com/aryandvn/VolumesBackup.git
-                cd VolumesBackup
-                rm -rf *
-                mkdir JenBackup
-                mkdir SonarQubeBackup
-                cd /
-                cd var/jenkins_home/
-                cp -r * /VolumesBackup/JenBackup/
-                ls -l
-                docker cp 89e8fcfeda9b:/nexus-data /VolumesBackup/
-                docker cp 6a88f6322ca7:/opt/sonarqube/conf /VolumesBackup/SonarQubeBackup
-                docker cp 6a88f6322ca7:/opt/sonarqube/extensions /VolumesBackup/SonarQubeBackup
-                docker cp 6a88f6322ca7:/opt/sonarqube/data /VolumesBackup/SonarQubeBackup
-                docker cp 6a88f6322ca7:/opt/sonarqube/lib/bundled-plugins /VolumesBackup/SonarQubeBackup
-                cd /
-                cd /VolumesBackup
-                tar -czvf JenBackup.tar.gz JenBackup/
-                tar -czvf NexusBackup.tar.gz nexus-data/
-                tar -czvf SonarQubeBackup.tar.gz SonarQubeBackup/
-                rm -rf JenBackup/
-                rm -rf nexus-data/
-                rm -rf SonarQubeBackup/
-                git status
-                git add .
-                git commit -m "Made changes"
-                """
-            } 
-        }
+    }
+  }
+  post {
+		always{
+			sh """
+				cd / && rm -rf UseCase/ && docker system prune -f
+			"""
+		}
     }
 }
