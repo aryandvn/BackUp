@@ -11,6 +11,17 @@ pipeline {
             git branch: 'main', url: 'https://github.com/aryandvn/BackUp.git'
         }
     }
+    stage('Static Analysis (SonarQube)') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withSonarQubeEnv('sq1') {
+                        sh """
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=LoginWebApp -Dsonar.projectName='LoginWebApp' -Dsonar.host.url=http://10.12.124.93:9000 -Dsonar.token=sqp_26e41a15638fe35c488ac1e1a6282be6a69b1535 
+                        """
+                    }
+                }
+            }
+        }	  
     stage('Build (war)') {
        steps {
             echo "Building war file"
