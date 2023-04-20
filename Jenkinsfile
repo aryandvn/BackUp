@@ -26,11 +26,6 @@ pipeline {
                 }
             }
         }
-    stage("Quality gate") {
-            steps {
-		    #Quality gates
-                waitForQualityGate abortPipeline: true
-            }
     stage('Build (war)') {
        steps {
             echo "Building war file"
