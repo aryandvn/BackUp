@@ -15,17 +15,29 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     withSonarQubeEnv('sq1') {
-                        sh """
-                        mvn clean verify sonar:sonar \
-  			-Dsonar.projectKey=LoginWebApp \
-  			-Dsonar.projectName='LoginWebApp' \
-  			-Dsonar.host.url=http://10.12.124.93:9000 \
-  			-Dsonar.token=sqp_26e41a15638fe35c488ac1e1a6282be6a69b1535
-                        """
+                    sh """
+                    mvn clean verify sonar:sonar \
+  			        -Dsonar.projectKey=LoginWebApp \
+  			        -Dsonar.projectName='LoginWebApp' \
+  			        -Dsonar.host.url=http://10.12.124.93:9000 \
+  			        -Dsonar.token=sqp_26e41a15638fe35c488ac1e1a6282be6a69b1535
+                    """
+                }
+            }
+        }
+    }
+    stage("Quality Gate"){
+        steps {
+            script {
+                timeout(time: 1, unit: 'MINUTES') {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
                     }
                 }
             }
-        }       
+        }
+    }    
     stage('Build (war)') {
        steps {
             echo "Building war file"
